@@ -45,5 +45,10 @@ class Board:
         self.winner = self.check_win(pos)
         self.player = (self.player % 2) + 1
 
+    def reset_board(self):
+        self.board = np.zeros(board_size, dtype=int)
+        self.player = 1
+        self.winner = None
+
     def __repr__(self):
         return f"{self.board}\n"
