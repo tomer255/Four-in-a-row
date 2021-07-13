@@ -14,19 +14,22 @@ def start():
 
 
 def game_loop(screen):
+    pygame.display.set_caption('Four in a row')
     game_board = board.Board()
-    colors = {0: (255, 255, 255), 1: (200, 0, 0), 2: (255, 255, 0)}
+    colors = {0: (255, 255, 255), 1: (200, 0, 0), 2: (255, 255, 0), None: (255, 255, 255)}
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == MOUSEBUTTONDOWN:
-                if game_board.winner is not None:
+                if game_board.end_game():
                     game_board.reset_board()
                 pos = pygame.mouse.get_pos()
                 pos = pos[0] // 100
                 game_board.move(pos)
+                if not game_board.end_game() and game_board.player == 2:
+                    game_board.move(game_board.best_move())
 
         screen.fill((0, 0, 255))
         for i in range(board.board_size[0]):
@@ -34,8 +37,7 @@ def game_loop(screen):
                 pygame.draw.circle(screen, (5, 5, 5), (50 + 100 * j, 550 - 100 * i), 45)
                 pygame.draw.circle(screen, colors[game_board.board[i, j]], (50 + 100 * j, 550 - 100 * i), 43)
 
-        if game_board.winner is not None:
-            pygame.display.set_caption('Show Text')
+        if game_board.end_game():
             font = pygame.font.Font('Inkfree.ttf', 72)
             text = font.render(f"player {game_board.winner} win!!!", True, colors[game_board.winner], (0, 0, 0))
             textRect = text.get_rect()
