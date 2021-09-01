@@ -2,8 +2,9 @@ import pygame
 import board
 from pygame.locals import *
 
-width = 700
-height = 600
+column_size = 100
+width = board.board_size[1] * column_size
+height = board.board_size[0] * column_size
 
 
 def start():
@@ -26,16 +27,16 @@ def game_loop(screen):
                 if game_board.end_game():
                     game_board.reset_board()
                 pos = pygame.mouse.get_pos()
-                pos = pos[0] // 100
+                pos = pos[0] // column_size
                 game_board.move(pos)
                 if not game_board.end_game() and game_board.player == 2:
-                    game_board.move(game_board.best_move())
+                     game_board.move(game_board.best_move())
 
         screen.fill((0, 0, 255))
         for i in range(board.board_size[0]):
             for j in range(board.board_size[1]):
-                pygame.draw.circle(screen, (5, 5, 5), (50 + 100 * j, 550 - 100 * i), 45)
-                pygame.draw.circle(screen, colors[game_board.board[i, j]], (50 + 100 * j, 550 - 100 * i), 43)
+                pygame.draw.circle(screen, (5, 5, 5), (column_size/2 + column_size * j, height - column_size/2 - column_size * i), 45)
+                pygame.draw.circle(screen, colors[game_board.board[i, j]], (column_size/2 + column_size * j, height - column_size/2 - column_size * i), 43)
 
         if game_board.end_game():
             font = pygame.font.Font('Inkfree.ttf', 72)

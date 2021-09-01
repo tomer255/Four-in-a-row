@@ -21,49 +21,36 @@ class Board:
         directions = [np.array((1, 1)), np.array((-1, 1)), np.array((0, 1)), np.array((1, 0))]
         for direction in directions:
             count = 0
-            dis = 1
-            new_pos = pos + direction * dis
-            while board_size[0] > new_pos[0] >= 0 and board_size[1] > new_pos[1] >= 0 and self.board[
-                tuple(new_pos)] == self.player:
-                count += 1
-                dis += 1
-                new_pos = pos + direction * dis
-
-            dis = 1
-            new_pos = pos - direction * dis
-            while board_size[0] > new_pos[0] >= 0 and board_size[1] > new_pos[1] >= 0 and self.board[
-                tuple(new_pos)] == self.player:
-                count += 1
-                dis += 1
-                new_pos = pos - direction * dis
-
+            count += self.count_in_direction(pos, direction)
+            count += self.count_in_direction(pos, -direction)
             if count >= 3:
                 return self.player
         return None
 
-    def count_max_row(self, pos: np.array):
+    def get_score(self, pos: np.array):
         directions = [np.array((1, 1)), np.array((-1, 1)), np.array((0, 1)), np.array((1, 0))]
         max_row = 0
         for direction in directions:
             count = 0
-            dis = 1
-            new_pos = pos + direction * dis
-            while board_size[0] > new_pos[0] >= 0 and board_size[1] > new_pos[1] >= 0 and self.board[
-                tuple(new_pos)] == self.player:
-                count += 1
-                dis += 1
-                new_pos = pos + direction * dis
-
-            dis = 1
-            new_pos = pos - direction * dis
-            while board_size[0] > new_pos[0] >= 0 and board_size[1] > new_pos[1] >= 0 and self.board[
-                tuple(new_pos)] == self.player:
-                count += 1
-                dis += 1
-                new_pos = pos - direction * dis
-
+            count += self.count_in_direction(pos, direction)
+            count += self.count_in_direction(pos, -direction)
             max_row = max(max_row, count)
         return max_row
+
+    def count_in_direction(self, pos, direction):
+        count = 0
+        distance = 1
+        new_pos = pos + direction * distance
+        while board_size[0] > new_pos[0] >= 0 and board_size[1] > new_pos[1] >= 0 and distance < 4:
+            if self.board[tuple(new_pos)] == self.player:
+                count += 1
+                distance += 1
+            elif self.board[tuple(new_pos)] == 0:
+                distance += 1
+            else:
+                break
+            new_pos = pos + direction * distance
+        return count
 
     def move(self, column: int):
         pos = self.drop(column)
@@ -82,24 +69,24 @@ class Board:
         return self.winner is not None or len(self.board.nonzero()[0]) == board_size[0] * board_size[1]
 
     def best_move(self):
-        best_score = -99
+        best_score = float('-inf')
         best_move = None
         for column in range(board_size[1]):
             if self.board[board_size[0] - 1, column] == 0:
                 child = copy.deepcopy(self)
                 pos = child.drop(column)
-                score = child.count_max_row(pos)
+                score = child.get_score(pos)
                 # offensive
                 if score > best_score:
                     best_score = score
                     best_move = column
-                # offensive
+                # defensive
                 child.player = (child.player % 2) + 1
                 for column2 in range(board_size[1]):
                     if child.board[board_size[0] - 1, column2] == 0:
                         child2 = copy.deepcopy(child)
                         pos = child2.drop(column2)
-                        score = child2.count_max_row(pos)
+                        score = child2.get_score(pos)
                         if score > best_score:
                             best_score = score
                             best_move = column2
